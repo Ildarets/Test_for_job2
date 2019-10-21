@@ -10,7 +10,7 @@ pygame.init()
 WINDOWWIDTH = 1000 # Ширина окна
 WINDOWHEIGHT = 1000 # Высота окна
 # Количество самолетов
-aircrafts = 40
+aircrafts = 5
 
 # Уровень здоровья самолета
 health = 10
@@ -24,7 +24,7 @@ quantity_rocket = 50
 #Площадь локатора самолета длина и ширина охвата
 size_loc = 300
 
-# Длитеьность полета ракеты в одном направлении
+# Длитеьность полета самолета в одном направлении мин и макс
 long_iter_min = 20
 long_iter_max = 80
 
@@ -32,9 +32,14 @@ long_iter_max = 80
 long_iter_roc = 50
 
 # Урон от пападания ракеты
-damage = 10
+damage = 11
+
 # Скорость обновления экрана
 time_update = 0.01
+
+# Скорость полета
+MOVESPEED1 = 2 # Самолета
+MOVESPEED2 = 4 # Ракеты
 
 ############################################################################
 
@@ -106,9 +111,6 @@ DOWN = 'down'
 LEFT = 'left'
 RIGHT = 'right'
 
-MOVESPEED1 = 2
-MOVESPEED2 = 4
-
 # Настройка цвета
 WHITE = (255, 255, 255)
 RED = (255, 0, 0)
@@ -118,12 +120,7 @@ WHITE_R = (255, 255, 230)
 
 # Для имитации движения
 c1 = 0
-lost_vec = random.randint(5, 20)
 long_iter = random.randint(5, 20)
-long_iter2 = random.randint(5, 20)
-vec_air1 = 4
-vec_air2 = 7
-
 # Создание структуры данных блока
 boxes = []
 rockets = []
@@ -131,6 +128,7 @@ for i in range(aircrafts):
     x_coord = random.randint(0, WINDOWWIDTH)
     y_coord = random.randint(0, WINDOWHEIGHT)
     direct = random.choice([UP, DOWNRIGHT, DOWN, DOWNLEFT, UPRIGHT, UPLEFT, LEFT, RIGHT])
+    lost_vec = random.choice([UP, DOWNRIGHT, DOWN, DOWNLEFT, UPRIGHT, UPLEFT, LEFT, RIGHT])
     b = {'rect': pygame.Rect(x_coord, y_coord, 20, 20),
          'color': RED,
          'dir': direct,
@@ -164,42 +162,25 @@ while True:
     for b in boxes:
         if b['c1'] == b['long_iter']:
             # Делаем полет более реальным, выбор направления полета в зависимости от текущего направления
-            if b['lost_vec'] == 0:
-                vec_air1 = random.choice([7, 0, 1])
-            elif b['lost_vec'] == 1:
-                vec_air1 = random.choice([0, 1, 2])
-            elif b['lost_vec'] == 2:
-                vec_air1 = random.choice([1, 2, 3])
-            elif b['lost_vec'] == 3:
-                vec_air1 = random.choice([2, 3, 4])
-            elif b['lost_vec'] == 4:
-                vec_air1 = random.choice([3, 4, 5])
-            elif b['lost_vec'] == 5:
-                vec_air1 = random.choice([4, 5, 6])
-            elif b['lost_vec'] == 6:
-                vec_air1 = random.choice([5, 6, 7])
-            elif b['lost_vec'] == 7:
-                vec_air1 = random.choice([6, 7, 0])
-
-            if vec_air1 == 0:
-                b['dir'] = UP
-            elif vec_air1 == 1:
-                b['dir'] = UPRIGHT
-            elif vec_air1 == 2:
-                b['dir'] = RIGHT
-            elif vec_air1 == 3:
-                b['dir'] = DOWNRIGHT
-            elif vec_air1 == 4:
-                b['dir'] = DOWN
-            elif vec_air1 == 5:
-                b['dir'] = DOWNLEFT
-            elif vec_air1 == 6:
-                b['dir'] = LEFT
-            elif vec_air1 == 7:
-                b['dir'] = UPLEFT
+            if b['lost_vec'] == UP:
+                b['dir'] = random.choice([UPLEFT,  UPRIGHT])
+            elif b['lost_vec'] == UPRIGHT:
+                b['dir'] = random.choice([UP,  RIGHT])
+            elif b['lost_vec'] == RIGHT:
+                b['dir'] = random.choice([UPRIGHT,  DOWNRIGHT])
+            elif b['lost_vec'] == DOWNRIGHT:
+                b['dir'] = random.choice([RIGHT,  DOWN])
+            elif b['lost_vec'] == DOWN:
+                b['dir'] = random.choice([DOWNLEFT, DOWNRIGHT])
+            elif b['lost_vec'] == DOWNLEFT:
+                b['dir'] = random.choice([DOWN, LEFT])
+            elif b['lost_vec'] == LEFT:
+                b['dir'] = random.choice([DOWNLEFT, UPLEFT])
+            elif b['lost_vec'] == UPLEFT:
+                b['dir'] = random.choice([LEFT,  UP])
 
             b['c1'] = 0
-            b['lost_vec'] = vec_air1
+            b['lost_vec'] = b['dir']
             b['long_iter'] = random.randint(long_iter_min, long_iter_max)
 
     # Создаем ракету
@@ -359,7 +340,6 @@ while True:
     for b in boxes:
         b['c1'] += 1
         b['modesty_count'] += 1
-        #summ_of_roc -= b['quantity_rocket']
 
 
     # Вывод окна на экран.
